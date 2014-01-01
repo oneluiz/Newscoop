@@ -44,7 +44,8 @@ final class CampTemplate extends Smarty
         $this->use_sub_dirs = $config->getSetting('smarty.use_subdirs');
 
         // cache settings
-        $cacheHandler = SystemPref::Get('TemplateCacheHandler');
+        $preferencesService = \Zend_Registry::get('container')->getService('system_preferences_service');
+        $cacheHandler = $preferencesService->TemplateCacheHandler;
         $auth = Zend_Auth::getInstance();
         if ($cacheHandler) {
             $this->caching = 1;
@@ -66,6 +67,10 @@ final class CampTemplate extends Smarty
         require_once APPLICATION_PATH . self::PLUGINS . '/function.render.php';
         $this->registerPlugin('function', 'render', 'smarty_function_render', false);
 
+        // define translate modifier
+        require_once APPLICATION_PATH . self::PLUGINS . '/modifier.translate.php';
+        $this->registerPlugin('modifier', 'translate', 'smarty_modifier_translate', false);
+
         $this->left_delimiter = '{{';
         $this->right_delimiter = '}}';
         $this->auto_literal = false;
@@ -84,11 +89,8 @@ final class CampTemplate extends Smarty
             APPLICATION_PATH . '/../themes/unassigned/system_templates/',
             APPLICATION_PATH . self::SCRIPTS,
         ));
-
-        if (isset($GLOBALS['controller'])) {
-            $this->assign('view', $GLOBALS['controller']->view);
-        }
-
+        
+        $this->assign('view', \Zend_Registry::get('container')->get('view'));
         $this->assign('userindex', false);
         $this->assign('user', new MetaUser());
     }
@@ -151,11 +153,16 @@ final class CampTemplate extends Smarty
     public function context()
     {
         if (!isset($this->m_context)) {
-            $this->m_context = new CampContext();
-            $this->m_preview = $this->m_context->preview;
+            $this->refreshContext();
         }
 
         return $this->m_context;
+    }
+
+    public function refreshContext()
+    {
+        $this->m_context = new CampContext();
+        $this->m_preview = $this->m_context->preview;
     }
 
     /**

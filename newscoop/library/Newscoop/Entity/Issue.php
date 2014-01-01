@@ -12,7 +12,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * Issue entity
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="Newscoop\Entity\Repository\IssueRepository")
  * @ORM\Table(name="Issues", uniqueConstraints={@ORM\UniqueConstraint(name="issues_unique", columns={"IdPublication", "Number", "IdLanguage"})})
  */
 class Issue
@@ -26,7 +26,7 @@ class Issue
     const NAME = __CLASS__;
 
     /**
-     * @ORM\Id 
+     * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      * @var int
@@ -267,15 +267,16 @@ class Issue
      */
     public function getWorkflowStatus($readable = false)
     {
+        $translator = \Zend_Registry::get('container')->getService('translator');
         $readableStatus = array(
-            self::STATUS_PUBLISHED => getGS('published'),
-            self::STATUS_NOT_PUBLISHED => getGS('unpublished'),
+            self::STATUS_PUBLISHED => $translator->trans('published'),
+            self::STATUS_NOT_PUBLISHED => $translator->trans('unpublished'),
         );
 
         if ($readable) {
             return $readableStatus[$this->workflowStatus];
         }
-        
+
         return $this->workflowStatus;
     }
 

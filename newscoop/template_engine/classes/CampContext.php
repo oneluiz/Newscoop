@@ -28,115 +28,160 @@ final class CampContext
 
     // Defines the object types
     private static $m_objectTypes = array(
-        'language'=>array('class'=>'Language',
-                      'handler'=>'setLanguageHandler'),
-        'publication'=>array('class'=>'Publication',
-                         'handler'=>'setPublicationHandler'),
-        'issue'=>array('class'=>'Issue',
-                   'handler'=>'setIssueHandler'),
-        'section'=>array('class'=>'Section',
-                     'handler'=>'setSectionHandler'),
-        'article'=>array('class'=>'Article',
-                     'handler'=>'setArticleHandler'),
-        'image'=>array('class'=>'Image'),
-        'attachment'=>array('class'=>'Attachment'),
-        'comment'=>array('class'=>'Comment',
-			         'handler'=>'setCommentHandler'),
-        'subtitle'=>array('class'=>'Subtitle',
-                      'handler'=>'setSubtitleHandler'),
-        'topic'=>array('class'=>'Topic',
-                   'handler'=>'setTopicHandler'),
-        'user'=>array('class'=>'User'),
-        'template'=>array('class'=>'Template'),
-        'location'=>array('class'=>'MapLocation'),
-        'author'=>array('class'=>'Author'),
+        'language'=>array(
+            'class'=>'Language',
+            'handler'=>'setLanguageHandler'
+        ),
+        'publication'=>array(
+            'class'=>'Publication',
+            'handler'=>'setPublicationHandler'
+        ),
+        'issue'=>array(
+            'class'=>'Issue',
+            'handler'=>'setIssueHandler'
+        ),
+        'section'=>array(
+            'class'=>'Section',
+            'handler'=>'setSectionHandler'
+        ),
+        'article'=>array(
+            'class'=>'Article',
+            'handler'=>'setArticleHandler'
+        ),
+        'image'=>array(
+            'class'=>'Image'
+        ),
+        'attachment'=>array(
+            'class'=>'Attachment'
+        ),
+        'comment'=>array(
+            'class'=>'Comment',
+            'handler'=>'setCommentHandler'
+        ),
+        'subtitle'=>array(
+            'class'=>'Subtitle',
+            'handler'=>'setSubtitleHandler'
+        ),
+        'topic'=>array(
+            'class'=>'Topic',
+            'handler'=>'setTopicHandler'
+        ),
+        'user'=>array(
+            'class'=>'User'
+        ),
+        'template'=>array(
+            'class'=>'Template'
+        ),
+        'location'=>array(
+            'class'=>'MapLocation'
+        ),
+        'author'=>array(
+            'class'=>'Author'
+        ),
         'list_user' => array(
             'class' => 'User',
-        ),
-        'community_feed' => array(
-            'class' => 'CommunityFeed',
         ),
         'user_comment' => array(
             'class' => 'Comment',
         )
     );
 
-/*    $taggedServices = $container->findTaggedServiceIds(
-        'acme_mailer.transport'
-    );
-    foreach ($taggedServices as $id => $tagAttributes) {
-        foreach ($tagAttributes as $attributes) {
-            $definition->addMethodCall(
-                'addTransport',
-                array(new Reference($id), $attributes["alias"])
-            );
-        }
-    }*/
-
     // Defines the list objects
     private $m_listObjects = array(
-        'languages'=>array('class'=>'Languages', 'list'=>'languages',
-                     'url_id'=>'lang'),
-        'issues'=>array('class'=>'Issues', 'list'=>'issues',
-			         'url_id'=>'iss'),
-        'sections'=>array('class'=>'Sections', 'list'=>'sections',
-			           'url_id'=>'sec'),
-        'articles'=>array('class'=>'Articles', 'list'=>'articles',
-			           'url_id'=>'art'),
-        'maparticles'=>array('class'=>'MapArticles', 'list'=>'map_articles',
-			           'url_id'=>'mart'),
-        'articleauthors'=>array('class'=>'ArticleAuthors',
-                             'list'=>'article_authors',
-                             'url_id'=>'aas'),
-        'sectionauthors'=>array('class'=>'SectionAuthors',
-                             'list'=>'section_authors',
-                             'url_id'=>'sas'),
-        'articlelocations'=>array('class'=>'ArticleLocations',
-                            'list'=>'article_locations',
-                            'url_id'=>'alc'),
-        'maplocations'=>array('class'=>'MapLocations',
-                            'list'=>'map_locations',
-                            'url_id'=>'mlc'),
-        'articleimages'=>array('class'=>'ArticleImages',
-                            'list'=>'article_images',
-                            'url_id'=>'aim'),
-        'articleattachments'=>array('class'=>'ArticleAttachments',
-                                 'list'=>'article_attachments',
-                                 'url_id'=>'aat'),
-        'articlecomments'=>array('class'=>'ArticleComments',
-                              'list'=>'article_comments',
-                              'url_id'=>'acm'),
-        'subtitles'=>array('class'=>'Subtitles', 'list'=>'subtitles',
-                        'url_id'=>'st'),
-        'articletopics'=>array('class'=>'ArticleTopics',
-                            'list'=>'article_topics', 'url_id'=>'atp'),
-        'searchresults'=>array('class'=>'SearchResults',
-                            'list'=>'search_results', 'url_id'=>'src'),
-
+        'languages'=>array(
+            'class' =>'Languages', 
+            'list'  =>'languages',
+            'url_id'=>'lang'
+        ),
+        'issues'=>array(
+            'class'=>'Issues', 
+            'list'=>'issues',
+            'url_id'=>'iss'
+        ),
+        'sections'=>array(
+            'class'=>'Sections', 
+            'list'=>'sections',
+            'url_id'=>'sec'
+        ),
+        'articles'=>array(
+            'class'=>'Articles', 
+            'list'=>'articles',
+            'url_id'=>'art'
+        ),
+        'maparticles'=>array(
+            'class'=>'MapArticles', 
+            'list'=>'map_articles',
+            'url_id'=>'mart'
+        ),
+        'articleauthors'=>array(
+            'class'=>'ArticleAuthors',
+            'list'=>'article_authors',
+            'url_id'=>'aas'
+        ),
+        'sectionauthors'=>array(
+            'class'=>'SectionAuthors',
+            'list'=>'section_authors',
+            'url_id'=>'sas'
+        ),
+        'articlelocations'=>array(
+            'class'=>'ArticleLocations',
+            'list'=>'article_locations',
+            'url_id'=>'alc'
+        ),
+        'maplocations'=>array(
+            'class'=>'MapLocations',
+            'list'=>'map_locations',
+            'url_id'=>'mlc'
+        ),
+        'articleimages'=>array(
+            'class'=>'ArticleImages',
+            'list'=>'article_images',
+            'url_id'=>'aim'
+        ),
+        'articleattachments'=>array(
+            'class'=>'ArticleAttachments',
+            'list'=>'article_attachments',
+            'url_id'=>'aat'
+        ),
+        'articlecomments'=>array(
+            'class'=>'ArticleComments',
+            'list'=>'article_comments',
+            'url_id'=>'acm'
+        ),
+        'subtitles'=>array(
+            'class'=>'Subtitles', 
+            'list'=>'subtitles',
+            'url_id'=>'st'
+        ),
+        'articletopics'=>array(
+            'class'=>'ArticleTopics',
+            'list'=>'article_topics', 
+            'url_id'=>'atp'
+        ),
+        'searchresults'=>array(
+            'class'=>'SearchResults',
+            'list'=>'search_results', 
+            'url_id'=>'src'
+        ),
         'searchresultssolr' => array(
             'class' => 'SearchResultsSolr',
             'list' => 'search_solr',
             'url_id' => 'solr'
         ),
-
-        'subtopics'=>array('class'=>'Subtopics', 'list'=>'subtopics',
-				        'url_id'=>'tp'),
-        'images'=>array('class'=>'Images', 'list'=>'images', 'url_id'=>'img'),
+        'subtopics'=>array(
+            'class'=>'Subtopics', 
+            'list'=>'subtopics',
+            'url_id'=>'tp'
+        ),
+        'images'=>array(
+            'class'=>'Images', 
+            'list'=>'images', 
+            'url_id'=>'img'
+        ),
         'users' => array(
             'class' => 'Users',
             'list' => 'users',
             'url_id' => 'uid',
-        ),
-        'newscoop\templatelist\users' => array(
-//            'class' => 'Newscoop\TemplateList\UsersList',
-            'class' => 'Newscoop\TemplateList\Users',
-            'list' => 'users',
-            'url_id' => 'uid',
-        ),
-        'communityfeeds' => array(
-            'class' => 'CommunityFeeds',
-            'list' => 'community_feeds',
-            'url_id' => 'cfid',
         ),
         'boxarticles' => array(
             'class' => 'BoxArticles',
@@ -148,11 +193,10 @@ final class CampContext
             'list' => 'user_comments',
             'url_id' => 'cid',
         ),
-        'playlist' => array
-        (
-        	'class' => 'Playlist',
-        	'list' => 'playlist',
-			'url_id' => 'pls'
+        'playlist' => array(
+            'class' => 'Playlist',
+            'list' => 'playlist',
+            'url_id' => 'pls'
         )
     );
 
@@ -227,48 +271,53 @@ final class CampContext
         self::$m_nullMetaArticle = new MetaArticle();
         self::$m_nullMetaSection = new MetaSection();
 
+        // LEGACY PLUGINS
         // register plugin objects and listobjects
         foreach (CampPlugin::GetPluginsInfo(true) as $info) {
-        	if (is_array($info['template_engine']['objecttypes'])) {
-        		foreach ($info['template_engine']['objecttypes'] as $objecttype) {
-        			$this->registerObjectType($objecttype);
-        		}
-        	}
+            if (is_array($info['template_engine']['objecttypes'])) {
+                foreach ($info['template_engine']['objecttypes'] as $objecttype) {
+                    $this->registerObjectType($objecttype);
+                }
+            }
 
-        	if (is_array($info['template_engine']['listobjects'])) {
-        		foreach ($info['template_engine']['listobjects'] as $listobject) {
-        			$this->registerListObject($listobject);
-        		}
-        	}
+            if (is_array($info['template_engine']['listobjects'])) {
+                foreach ($info['template_engine']['listobjects'] as $listobject) {
+                    $this->registerListObject($listobject);
+                }
+            }
         }
+
+        // Register new plugins system list objects
+        $pluginsService = \Zend_Registry::get('container')->get('newscoop.plugins.service');
+        $collectedData = $pluginsService->collectListObjects();
+        $this->m_listObjects = array_merge($collectedData['listObjects'], $this->m_listObjects);
+        CampContext::$m_objectTypes = array_merge($collectedData['objectTypes'], CampContext::$m_objectTypes);
 
         $this->m_properties['htmlencoding'] = false;
         $this->m_properties['subs_by_type'] = null;
 
         $this->m_readonlyProperties['version'] = $Campsite['VERSION'];
-
         $this->m_readonlyProperties['current_list'] = null;
         $this->m_readonlyProperties['lists'] = array();
         $this->m_readonlyProperties['prev_list_empty'] = null;
-
         $this->m_readonlyProperties['default_url'] = new MetaURL();
         $this->m_readonlyProperties['url'] = new MetaURL();
         if (!$this->m_readonlyProperties['default_url']->is_valid) {
-        	header('HTTP/1.0 404 Not Found');
-        	if (!$this->m_readonlyProperties['url']->language->defined) {
-        		$this->m_readonlyProperties['url']->language = $this->m_readonlyProperties['url']->publication->default_language;
-        		$this->m_readonlyProperties['default_url'] = $this->m_readonlyProperties['url'];
-        	}
+            header('HTTP/1.0 404 Not Found');
+            if (!$this->m_readonlyProperties['url']->language->defined) {
+                $this->m_readonlyProperties['url']->language = $this->m_readonlyProperties['url']->publication->default_language;
+                $this->m_readonlyProperties['default_url'] = $this->m_readonlyProperties['url'];
+            }
         }
 
         $this->m_objects['user'] = $this->m_readonlyProperties['url']->user;
         $this->m_readonlyProperties['preview'] = $this->m_readonlyProperties['url']->preview;
 
         if (!$this->m_readonlyProperties['preview']) {
-        	if (!$this->m_readonlyProperties['url']->article->is_published) {
-        		$this->m_readonlyProperties['default_url']->article = self::$m_nullMetaArticle;
+            if (!$this->m_readonlyProperties['url']->article->is_published) {
+                $this->m_readonlyProperties['default_url']->article = self::$m_nullMetaArticle;
                 $this->m_readonlyProperties['url']->article = self::$m_nullMetaArticle;
-        	}
+            }
             if (!$this->m_readonlyProperties['url']->issue->is_published) {
                 $this->m_readonlyProperties['default_url']->article = self::$m_nullMetaArticle;
                 $this->m_readonlyProperties['url']->article = self::$m_nullMetaArticle;
@@ -304,7 +353,7 @@ final class CampContext
         $this->m_readonlyProperties['request_action'] = MetaAction::CreateAction(CampRequest::GetInput(CampRequest::GetMethod()));
         $requestActionName = $this->m_readonlyProperties['request_action']->name;
         if ($requestActionName != 'default') {
-        	$this->m_readonlyProperties['request_action']->takeAction($this);
+            $this->m_readonlyProperties['request_action']->takeAction($this);
         }
 
         foreach (MetaAction::ReadAvailableActions() as $actionName=>$actionAttributes) {
@@ -359,8 +408,9 @@ final class CampContext
         try {
             $p_element = CampContext::TranslateProperty($p_element);
 
-        	// Verify if an object of this type exists
+            // Verify if an object of this type exists
             if (!is_null(CampContext::ObjectType($p_element))) {
+
                 if (!isset($this->m_objects[$p_element])
                 || is_null($this->m_objects[$p_element])) {
                     $this->createObject($p_element);
@@ -412,6 +462,8 @@ final class CampContext
 
                 if (file_exists($classFullPath)) {
                     require_once($classFullPath);
+                } else if (class_exists(CampContext::$m_objectTypes[$p_element]['class'])) {
+                    $className = CampContext::ObjectType($p_element);
                 } else {
                     $pluginImplementsClassFullPath = false;
 
@@ -489,7 +541,7 @@ final class CampContext
      */
     public function has_object($p_object)
     {
-    	$p_object = CampContext::TranslateProperty($p_object);
+        $p_object = CampContext::TranslateProperty($p_object);
         return !is_null(CampContext::ObjectType($p_object));
     } // fn has_object
 
@@ -655,19 +707,19 @@ final class CampContext
 
         $listName = $this->m_listObjects[$objectName]['list'];
         if (!isset($this->m_list_count[$listName.'_lists'])) {
-        	$this->m_list_count[$listName.'_lists'] = 1;
+            $this->m_list_count[$listName.'_lists'] = 1;
         } else {
-        	$this->m_list_count[$listName.'_lists']++;
+            $this->m_list_count[$listName.'_lists']++;
         }
 
-   	    $this->SaveProperties($p_savePropertiesList);
+        $this->SaveProperties($p_savePropertiesList);
 
-   	    $this->m_readonlyProperties['lists'][] =& $p_list;
-   	    $this->m_readonlyProperties['current_list'] =& $p_list;
-   	    $this->m_readonlyProperties[$listName.'_lists'][] =& $p_list;
-   	    $this->m_readonlyProperties['current_'.$listName.'_list'] =& $p_list;
+        $this->m_readonlyProperties['lists'][] =& $p_list;
+        $this->m_readonlyProperties['current_list'] =& $p_list;
+        $this->m_readonlyProperties[$listName.'_lists'][] =& $p_list;
+        $this->m_readonlyProperties['current_'.$listName.'_list'] =& $p_list;
         
-   	    return $this->m_readonlyProperties;
+        return $this->m_readonlyProperties;
     } // fn setCurrentList
 
 
@@ -697,7 +749,7 @@ final class CampContext
         }
 
         array_pop($this->m_readonlyProperties['lists']);
-   	    $this->m_readonlyProperties['current_list'] = end($this->m_readonlyProperties['lists']);
+        $this->m_readonlyProperties['current_list'] = end($this->m_readonlyProperties['lists']);
     } // fn resetCurrentList
 
 
@@ -766,8 +818,6 @@ final class CampContext
      */
     private function createObject($p_objectType)
     {
-        global $_SERVER;
-
         $p_objectType = CampContext::TranslateProperty($p_objectType);
 
         $classFullPath = $GLOBALS['g_campsiteDir'].'/template_engine/metaclasses/'
@@ -775,6 +825,8 @@ final class CampContext
 
         if (file_exists($classFullPath)) {
             require_once($classFullPath);
+        } else if (class_exists(CampContext::$m_objectTypes[$p_objectType]['class'])) {
+            $className = CampContext::ObjectType($p_objectType);
         } else {
             $pluginImplementsClassFullPath = false;
 
@@ -793,7 +845,7 @@ final class CampContext
         }
 
         $className = CampContext::ObjectType($p_objectType);
-        $this->m_objects[$p_objectType] = new $className;
+        $this->m_objects[$p_objectType] = new $className();
 
         return $this->m_objects[$p_objectType];
     } // fn createObject
@@ -836,7 +888,7 @@ final class CampContext
 
 
     /**
-     * Register an new object type (for plugin)
+     * Register an new object type
      *
      * @param array $p_objectType
      * structure: array(object name => object class name)
@@ -860,26 +912,26 @@ final class CampContext
 
 
     /**
-     * Register an list object (for plugins)
+     * Register an list object
      *
      * @param array $p_listObject
      * structure: array(list object name => array('class' => class name, 'list' => list class name))
      */
-    final private function registerListObject(array $p_listObject)
+    final private function registerListObject(array $listObject)
     {
         try {
             // check the structure
-            $keys = array_keys($p_listObject);
-            $values = array_values($p_listObject);
+            $keys = array_keys($listObject);
+            $values = array_values($listObject);
 
             if (count($keys) !== 1 || count($values) !== 1) {
-                throw new Exception('CampContext::registerListObject called with malformed parameter: '.print_r($p_listObject));
+                throw new Exception('CampContext::registerListObject called with malformed parameter: '.print_r($listObject));
             }
         } catch (Exception $e) {
             $this->trigger_invalid_register_error($e->getMessage());
         }
 
-        $this->m_listObjects += $p_listObject;
+        $this->m_listObjects += $listObject;
     }
 
 
@@ -987,24 +1039,24 @@ final class CampContext
         $this->m_objects['language'] = $p_newLanguage;
 
         if ($this->article->defined()) {
-        	$oldArticle = $this->m_objects['article'];
-        	$newArticle = new MetaArticle($p_newLanguage->number,
-        	                              $oldArticle->number);
+            $oldArticle = $this->m_objects['article'];
+            $newArticle = new MetaArticle($p_newLanguage->number,
+                                          $oldArticle->number);
             $this->setArticleHandler($oldArticle, $newArticle);
         }
         if ($this->section->defined() && !$this->m_objects['article']->defined()) {
-        	$oldSection = $this->m_objects['section'];
-        	$newSection = new MetaSection($oldSection->publication->identifier,
-        	                              $oldSection->issue->number,
-        	                              $p_newLanguage->number,
-        	                              $oldSection->number);
+            $oldSection = $this->m_objects['section'];
+            $newSection = new MetaSection($oldSection->publication->identifier,
+                                          $oldSection->issue->number,
+                                          $p_newLanguage->number,
+                                          $oldSection->number);
             $this->setSectionHandler($oldSection, $newSection);
         }
         if ($this->issue->defined() && !$this->m_objects['section']->defined()) {
-        	$oldIssue = $this->m_objects['issue'];
-        	$newIssue = new MetaIssue($oldIssue->publication->identifier,
-        	                          $p_newLanguage->number,
-        	                          $oldIssue->number);
+            $oldIssue = $this->m_objects['issue'];
+            $newIssue = new MetaIssue($oldIssue->publication->identifier,
+                                      $p_newLanguage->number,
+                                      $oldIssue->number);
             $this->setIssueHandler($oldIssue, $newIssue);
         }
 
@@ -1116,7 +1168,7 @@ final class CampContext
         if (!$this->m_readonlyProperties['preview']
         && (!$p_newArticle->is_published || !$p_newArticle->issue->is_published)
         && $p_newArticle->defined()) {
-        	return;
+            return;
         }
 
         if ($articleHandlerRunning || $p_newArticle->same_as($p_oldArticle)) {
@@ -1154,7 +1206,7 @@ final class CampContext
     private function setCommentHandler(MetaComment $p_oldComment, MetaComment $p_newComment) {
         if (!$p_oldComment->same_as($p_newComment)) {
             if ($p_newComment->defined()) {
-            	$this->setArticleHandler($this->article, $p_newComment->article);
+                $this->setArticleHandler($this->article, $p_newComment->article);
             }
             $this->m_objects['comment'] = $p_newComment;
         }
@@ -1184,8 +1236,17 @@ final class CampContext
      */
     protected static function ObjectType($p_property)
     {
+
         // Verify if an object of this type exists
         if (array_key_exists($p_property, CampContext::$m_objectTypes)) {
+            if (
+                strpos(CampContext::$m_objectTypes[$p_property]['class'], '\\') !== false &&
+                class_exists(CampContext::$m_objectTypes[$p_property]['class'])
+            ) {
+
+                return CampContext::$m_objectTypes[$p_property]['class'];
+            }
+        
             return 'Meta'.CampContext::$m_objectTypes[$p_property]['class'];
         }
         return null;

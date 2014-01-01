@@ -14,7 +14,7 @@ class Admin_Bootstrap extends Zend_Application_Module_Bootstrap
      */
     protected function _initNewscoop()
     {
-        global $ADMIN_DIR, $ADMIN, $g_user, $prefix, $Campsite;
+        global $ADMIN, $g_user, $prefix, $Campsite;
 
         defined('WWW_DIR')
             || define('WWW_DIR', realpath(APPLICATION_PATH . '/../'));
@@ -41,7 +41,7 @@ class Admin_Bootstrap extends Zend_Application_Module_Bootstrap
         // detect extended login/logout files
         $prefix = file_exists(CS_PATH_SITE . DIR_SEP . 'admin-files' . DIR_SEP . 'ext_login.php') ? '/ext_' : '/';
 
-        require_once CS_PATH_SITE . DIR_SEP . $ADMIN_DIR . DIR_SEP . 'camp_html.php';
+        require_once CS_PATH_SITE .'/admin-files/camp_html.php';
         require_once CS_PATH_CLASSES . DIR_SEP . 'SecurityToken.php';
 
         // load if possible before setting camp_report_bug error handler
@@ -54,22 +54,13 @@ class Admin_Bootstrap extends Zend_Application_Module_Bootstrap
             set_error_handler(function($p_number, $p_string, $p_file, $p_line) {
                 error_log(sprintf('Newscoop error: %s in %s:%d', $p_string, $p_file, $p_line));
 
-                global $ADMIN_DIR, $Campsite;
-                require_once $Campsite['HTML_DIR'] . "/$ADMIN_DIR/bugreporter/bug_handler_main.php";
+                global $Campsite;
+                require_once $Campsite['HTML_DIR'] . "/admin-files/bugreporter/bug_handler_main.php";
                 camp_bug_handler_main($p_number, $p_string, $p_file, $p_line);
             }, error_reporting());
         }
 
-        camp_load_translation_strings("api");
-        $plugins = CampPlugin::GetEnabled(true);
-        foreach ($plugins as $plugin) {
-            camp_load_translation_strings("plugin_".$plugin->getName());
-        }
-
-        // Load common translation strings
-        camp_load_translation_strings('globals');
-
-        require_once APPLICATION_PATH . "/../$ADMIN_DIR/init_content.php";
+        require_once APPLICATION_PATH . "/../admin-files/init_content.php";
 
         if (file_exists($Campsite['HTML_DIR'] . '/reset_cache')) {
             CampCache::singleton()->clear('user');
@@ -109,7 +100,7 @@ class Admin_Bootstrap extends Zend_Application_Module_Bootstrap
     {
         global $Campsite;
 
-        $title = !empty($Campsite['site']['title']) ? htmlspecialchars($Campsite['site']['title']) : getGS('Newscoop') . $Campsite['VERSION'];
+        $title = !empty($Campsite['site']['title']) ? htmlspecialchars($Campsite['site']['title']) : $translator->trans('Newscoop', array(), 'home') . $Campsite['VERSION'];
 
         $view = $this->getResource('view');
         $view->headTitle($title)
@@ -171,26 +162,6 @@ class Admin_Bootstrap extends Zend_Application_Module_Bootstrap
         $acl->setStorage($storage);
 
         Zend_Registry::set('acl', $acl);
-    }
-
-    /**
-     * Init forms translator
-     */
-    protected function _initForm()
-    {
-        $translate = new Zend_Translate(array(
-            'adapter' => 'array',
-            'disableNotices' => TRUE,
-            'content' => array(
-                "Value is required and can't be empty" => getGS("Value is required and can't be empty"),
-                "'%value%' is less than %min% characters long" => getGS("'%value%' is less than %min% characters long"),
-                "'%value%' is more than %max% characters long" => getGS("'%value%' is more than %max% characters long"),
-                "The two given tokens do not match" => getGS("Security token expired. Please resubmit the form."),
-                "No token was provided to match against" => getGS("Security token expired. Please resubmit the form."),
-            ),
-        ));
-
-        Zend_Form::setDefaultTranslator($translate);
     }
 
     protected function _initNewscoopViewHelpers()

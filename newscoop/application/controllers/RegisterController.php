@@ -14,7 +14,6 @@ class RegisterController extends Zend_Controller_Action
 {
     public function init()
     {
-        camp_load_translation_strings('users');
         $this->_helper->contextSwitch
             ->addActionContext('generate-username', 'json')
             ->addActionContext('check-username', 'json')
@@ -27,7 +26,8 @@ class RegisterController extends Zend_Controller_Action
     }
 
     public function indexAction()
-    {
+    {   
+        $translator = \Zend_Registry::get('container')->getService('translator');
         $form = new Application_Form_Register();
         $form->setMethod('POST');
 
@@ -45,7 +45,7 @@ class RegisterController extends Zend_Controller_Action
             }
 
             if (!$user->isPending()) {
-                $form->email->addError(sprintf(getGS('User with email %s is registered already.'), $values['email']));
+                $form->email->addError(sprintf($translator->trans('User with email %s is registered already.', array(), 'users'), $values['email']));
             } else {
                 $this->_helper->service('email')->sendConfirmationToken($user);
                 $this->_helper->redirector('after');
@@ -83,6 +83,8 @@ class RegisterController extends Zend_Controller_Action
     {
         $user = $this->getAuthUser();
 
+        $translator = \Zend_Registry::get('container')->getService('translator');
+        
         $form = $this->_helper->form('confirm');
         $form->setMethod('POST');
         $form->setDefaults(array(
@@ -97,9 +99,6 @@ class RegisterController extends Zend_Controller_Action
             $form->removeElement('password_confirm');
         }
 
-        $listView = $this->_helper->service('mailchimp.list')->getListView();
-        $this->_helper->newsletter->initForm($form, $listView);
-
         $request = $this->getRequest();
         if ($request->isPost() && $form->isValid($request->getPost())) {
             $values = $form->getValues();
@@ -109,7 +108,6 @@ class RegisterController extends Zend_Controller_Action
                     'user' => $user,
                 )));
                 $this->_helper->service('user.token')->invalidateTokens($user, 'email.confirm');
-                $this->_helper->service('mailchimp.list')->subscribe($user->getEmail(), $values['newsletter']);
 
                 $auth = \Zend_Auth::getInstance();
                 if ($auth->hasIdentity()) {
@@ -122,12 +120,11 @@ class RegisterController extends Zend_Controller_Action
                     $this->_helper->redirector('index', 'dashboard', 'default', array('first' => 1));
                 }
             } catch (InvalidArgumentException $e) {
-                $form->username->addError(getGS('Username is used. Please use another one.'));
+                $form->username->addError($translator->trans('Username is used. Please use another one.', array(), 'users'));
             }
         }
 
         $this->view->form = $form;
-        $this->view->newsletter = $listView;
     }
 
     public function generateUsernameAction()

@@ -1,6 +1,6 @@
 <?php
 /**
- * @packageNewscoop\NewscoopBundle
+ * @package Newscoop\NewscoopBundle
  * @author Rafał Muszyński <rafal.muszynski@sourcefabric.org>
  * @copyright 2013 Sourcefabric o.p.s.
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
@@ -10,6 +10,7 @@ namespace Newscoop\NewscoopBundle\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
 class PreferencesType extends AbstractType
 {
@@ -407,16 +408,35 @@ class PreferencesType extends AbstractType
             'error_bubbling' => true,
             'required' => false
         ))
-        ->add('mailchimp_apikey', null, array(
+        ->add('recaptchaPublicKey', null, array(
             'attr' => array('maxlength' => 200, 'size' => 40),
             'error_bubbling' => true,
             'required' => false
         ))
-        ->add('mailchimp_listid', null, array(
+        ->add('recaptchaPrivateKey', null, array(
             'attr' => array('maxlength' => 200, 'size' => 40),
             'error_bubbling' => true,
             'required' => false
+        ))
+        ->add('recaptchaSecure', 'choice', array(
+            'choices'   => array(
+                'Y' => 'newscoop.preferences.label.yesoption', 
+                'N' => 'newscoop.preferences.label.nooption'
+            ),
+            'data' => 'N',
+            'error_bubbling' => true,
+            'multiple' => false,
+            'expanded' => true,
+            'required' => true,
         ));
+    }
+
+    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    {    
+        $resolver->setDefaults(array(
+            'translation_domain' => 'system_pref'
+        ));
+
     }
 
     public function getName()

@@ -1,4 +1,10 @@
 <?php
+/**
+ * @package Newscoop\NewscoopBundle
+ * @author Paweł Mikołajczuk <pawel.mikolajczuk@sourcefabric.org>
+ * @copyright 2013 Sourcefabric o.p.s.
+ * @license http://www.gnu.org/licenses/gpl-3.0.txt
+ */
 
 namespace Newscoop\NewscoopBundle\Controller;
 
@@ -28,7 +34,6 @@ class SecurityController extends Controller
 
         $languages = $em->getRepository('Newscoop\Entity\Language')->getLanguages();
 
-        //Delete IP records older than 12 hours from the database.
         \LoginAttempts::DeleteOldLoginAttempts();
 
         return array(

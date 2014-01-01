@@ -36,7 +36,6 @@ class Builder
 
         $this->showConfigureMenu = (
             $this->showPublishingEnvironmentMenu || 
-            $this->user->hasPermission('ManageLocalizer') || 
             $this->user->hasPermission('ViewLogs')
         );
 
@@ -56,14 +55,19 @@ class Builder
         $this->container = $container;
     }
 
-    public function mainMenu()
-    {
-        camp_load_translation_strings('home');
-        $this->user  = $this->container->getService('user')->getCurrentUser();
+    public function mainMenu($modern = false)
+    {   
+        $translator = $this->container->get('translator');
+        $this->user = $this->container->getService('user')->getCurrentUser();
         $this->preparePrivileges();
 
         $menu = $this->factory->createItem('root');
-        $menu->setChildrenAttribute('class', 'navigation');
+
+        if ($modern) {
+            $menu->setChildrenAttribute('class', 'nav navbar-nav');
+        } else {
+            $menu->setChildrenAttribute('class', 'navigation');
+        }
 
         // change menu for blogger
         $blogService = $this->container->get('blog');
@@ -72,30 +76,58 @@ class Builder
                 'data-menu' => 'not-menu'
             )));
 
-            $menu = $this->decorateMenu($menu);
+            if (!$modern) {
+                $menu = $this->decorateMenu($menu);
+            }
+
             return $menu;
         }
 
-        $menu->addChild(getGS('Dashboard'), array('uri' => $this->generateZendRoute('admin'), 'attributes' => array(
-            'data-menu' => 'not-menu'
-        )));
+        $menu->addChild($translator->trans('Dashboard', array(), 'home'), array('uri' => $this->generateZendRoute('admin')));
 
-        $menu->addChild(getGS('Content'), array('uri' => '#'));
-        $this->prepareContentMenu($menu[getGS('Content')]);
+        if ($modern) {
+            $menu->addChild($translator->trans('Content'), array('uri' => '#'))
+                ->setAttribute('dropdown', true)
+                ->setLinkAttribute('data-toggle', 'dropdown');
 
-        $menu->addChild(getGS('Actions'), array('uri' => '#'));
-        $this->prepareActionsMenu($menu[getGS('Actions')]);
+            $this->prepareContentMenu($menu[$translator->trans('Content')], $modern);
 
-        if ($this->showConfigureMenu) {
-            $menu->addChild(getGS('Configure'), array('uri' => '#'));
-            $this->prepareConfigureMenu($menu[getGS('Configure')]);
+            $menu->addChild($translator->trans('Actions'), array('uri' => '#'))
+                ->setAttribute('dropdown', true)
+                ->setLinkAttribute('data-toggle', 'dropdown');
+
+            $this->prepareActionsMenu($menu[$translator->trans('Actions')]);
+
+            if ($this->showConfigureMenu) {
+                $menu->addChild($translator->trans('Configure'), array('uri' => '#'))
+                    ->setAttribute('dropdown', true)
+                    ->setLinkAttribute('data-toggle', 'dropdown');
+                $this->prepareConfigureMenu($menu[$translator->trans('Configure')]);
+            }
+
+            if ($this->showUserMenu) {
+                $menu->addChild($translator->trans('Users'), array('uri' => '#'))
+                    ->setAttribute('dropdown', true)
+                    ->setLinkAttribute('data-toggle', 'dropdown');
+                $this->prepareUsersMenu($menu[$translator->trans('Users')]);
+            }
+        } else {
+            $menu->addChild($translator->trans('Content'), array('uri' => '#'));
+            $this->prepareContentMenu($menu[$translator->trans('Content')], $modern);
+
+            $menu->addChild($translator->trans('Actions'), array('uri' => '#'));
+            $this->prepareActionsMenu($menu[$translator->trans('Actions')]);
+
+            if ($this->showConfigureMenu) {
+                $menu->addChild($translator->trans('Configure'), array('uri' => '#'));
+                $this->prepareConfigureMenu($menu[$translator->trans('Configure')]);
+            }
+
+            if ($this->showUserMenu) {
+                $menu->addChild($translator->trans('Users'), array('uri' => '#'));
+                $this->prepareUsersMenu($menu[$translator->trans('Users')]);
+            }
         }
-
-        if ($this->showUserMenu) {
-            $menu->addChild(getGS('Users'), array('uri' => '#'));
-            $this->prepareUsersMenu($menu[getGS('Users')]);
-        }
-
 
         $this->preparePluginsMenu($menu);
 
@@ -106,7 +138,9 @@ class Builder
             $this->container->get('router')
         ));
 
-        $menu = $this->decorateMenu($menu);
+        if (!$modern) {
+            $menu = $this->decorateMenu($menu);
+        }
 
         return $menu;
     }
@@ -141,14 +175,16 @@ class Builder
 
     private function decorateMenu($menu) {
         foreach ($menu as $key => $value) {
-            $value->setLinkAttribute('class', 'fg-button ui-widget fg-button-icon-right fg-button-ui-state-default fg-button-ui-corner-all');
+            $value->setLinkAttribute('class', 'fg-button fg-button-menu ui-widget fg-button-icon-right fg-button-ui-state-default fg-button-ui-corner-all');
         }
 
         return $menu;
     }
 
-    private function prepareContentMenu($menu) {
-       $this->addChild($menu, getGS('Publications'), array('zend_route' => array(
+    private function prepareContentMenu($menu, $modern) {
+        $translator = $this->container->get('translator');
+
+        $this->addChild($menu, $translator->trans('Publications'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'pub',
                 'action' => 'index.php',
@@ -157,7 +193,7 @@ class Builder
             'privilege' => 'manage',
         ));
 
-        $this->addChild($menu, getGS('Comments'), array('zend_route' => array(
+        $this->addChild($menu, $translator->trans('Comments'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'comment',
                 'action' => 'index',
@@ -166,7 +202,7 @@ class Builder
             'privilege' => 'moderate',
         ));
 
-        $this->addChild($menu, getGS('Feedback'), array('zend_route' => array(
+        $this->addChild($menu, $translator->trans('Feedback', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'feedback',
                 'action' => 'index',
@@ -175,28 +211,28 @@ class Builder
             'privilege' => 'manage',
         ));
 
-        $this->addChild($menu, getGS('Media Archive'), array('zend_route' => array(
+        $this->addChild($menu, $translator->trans('Media Archive', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'media-archive',
                 'action' => 'index.php',
             )
         ));
 
-        $this->addChild($menu, getGS('Search'), array('zend_route' => array(
+        $this->addChild($menu, $translator->trans('Search'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'universal-list',
                 'action' => 'index.php',
             )
         ));
 
-        $this->addChild($menu, getGS('Pending articles'), array('zend_route' => array(
+        $this->addChild($menu, $translator->trans('Pending articles', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'pending_articles',
                 'action' => 'index.php',
             )
         ));
 
-        $this->addChild($menu, getGS('Featured Article Lists'), array('zend_route' => array(
+        $this->addChild($menu, $translator->trans('Featured Article Lists', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'playlist',
                 'action' => 'index',
@@ -209,7 +245,9 @@ class Builder
         $publicationService = $this->container->get('content.publication');
         foreach ($publicationService->findAll() as $publication) {
             $pubId = $publication->getId();
-            $this->addChild($menu, $publication->getName(), array('uri' => $this->generateZendRoute('admin') . "/issues/?Pub=$pubId"));
+            $this->addChild($menu, $publication->getName(), array('uri' => $this->generateZendRoute('admin') . "/issues/?Pub=$pubId"))
+                ->setAttribute('rightdrop', true)
+                ->setLinkAttribute('data-toggle', 'rightdrop');
 
             // add content/publication/issue
             foreach ($publication->getIssues() as $issue) {
@@ -220,7 +258,8 @@ class Builder
                     $menu[$publication->getName()], 
                     $issueName, 
                     array('uri' => $this->generateZendRoute('admin', array('zend_route' => array('reset_params' => true))) . "/sections/?Pub=$pubId&Issue=$issueId&Language=$languageId"
-                ));
+                ))->setAttribute('rightdrop', true)
+                ->setLinkAttribute('data-toggle', 'rightdrop');
 
                 // add content/publication/issue/section
                     foreach ($issue->getSections() as $section) {
@@ -233,28 +272,47 @@ class Builder
                         ));
                     }
                     if (count($issue->getSections()) > 0) {
-                        $this->addChild(
-                            $menu[$publication->getName()][$issueName],
-                            getGS('More...'), 
-                            array('uri' => $this->generateZendRoute('admin', array('zend_route' => array('reset_params' => true))) . "/sections/?Pub=$pubId&Issue=$issueId&Language=$languageId"
-                        ));
+                        if (!$modern) {
+                            $this->addChild($menu[$publication->getName()][$issueName], null, array())->setAttribute('class', 'divider');
+                            $this->addChild(
+                                $menu[$publication->getName()][$issueName],
+                                $translator->trans('More...'), 
+                                array('uri' => $this->generateZendRoute('admin', array('zend_route' => array('reset_params' => true))) . "/sections/?Pub=$pubId&Issue=$issueId&Language=$languageId"
+                            ));
+                        } else {
+                            $this->addChild(
+                                $menu[$publication->getName()][$issueName],
+                                $translator->trans('More...'), 
+                                array('uri' => $this->generateZendRoute('admin', array('zend_route' => array('reset_params' => true))) . "/sections/?Pub=$pubId&Issue=$issueId&Language=$languageId"
+                            ))->setAttribute('divider_prepend', true);
+                        }
                     }
-            }
-                
+            }  
+
             if (count($publication->getIssues()) > 0) {
-                $this->addChild(
-                    $menu[$publication->getName()],
-                    getGS('More...'), 
-                    array('uri' => $this->generateZendRoute('admin', array('zend_route' => array('reset_params' => true))) . "/issues/?Pub=$pubId"
-                ));
+                if (!$modern) {
+                    $this->addChild($menu[$publication->getName()], null, array())->setAttribute('class', 'divider');
+                    $this->addChild(
+                        $menu[$publication->getName()],
+                        $translator->trans('More...'), 
+                        array('uri' => $this->generateZendRoute('admin', array('zend_route' => array('reset_params' => true))) . "/issues/?Pub=$pubId"
+                    ));
+                } else {
+                    $this->addChild(
+                        $menu[$publication->getName()],
+                        $translator->trans('More...'), 
+                        array('uri' => $this->generateZendRoute('admin', array('zend_route' => array('reset_params' => true))) . "/issues/?Pub=$pubId"
+                    ))->setAttribute('divider_prepend', true);
+                }
             }
         }    
     }
 
     private function prepareActionsMenu($menu) 
     {
+        $translator = $this->container->get('translator');
 
-        $this->addChild($menu, getGS('Add new article'), array('zend_route' => array(
+        $this->addChild($menu, $translator->trans('Add new article'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'articles',
                 'action' => 'add_move.php',
@@ -263,7 +321,7 @@ class Builder
             'privilege' => 'add',
         ));
 
-        $this->addChild($menu, getGS('Add new publication'), array('zend_route' => array(
+        $this->addChild($menu, $translator->trans('Add new publication'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'pub',
                 'action' => 'add.php',
@@ -272,7 +330,7 @@ class Builder
             'privilege' => 'manage',
         ));
 
-        $this->addChild($menu, getGS('Add new user'), array('zend_route' => array(
+        $this->addChild($menu, $translator->trans('Add new user', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'user',
                 'action' => 'create'
@@ -281,7 +339,7 @@ class Builder
             'privilege' => 'manage',
         ));
 
-        $this->addChild($menu, getGS('Add new user type'), array('zend_route' => array(
+        $this->addChild($menu, $translator->trans('Add new user type', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'user-group',
                 'action' => 'add'
@@ -290,7 +348,7 @@ class Builder
             'privilege' => 'manage',
         ));
 
-        $this->addChild($menu, getGS('Add new article type'), array('zend_route' => array(
+        $this->addChild($menu, $translator->trans('Add new article type'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'article_types',
                 'action' => 'add.php',
@@ -300,7 +358,7 @@ class Builder
             'privilege' => 'manage',
         ));
 
-        $this->addChild($menu, getGS('Merge article types'), array('zend_route' => array(
+        $this->addChild($menu, $translator->trans('Merge article types', array(), 'article_types'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'article_types',
                 'action' => 'merge.php',
@@ -310,7 +368,7 @@ class Builder
             'privilege' => 'manage',
         ));
 
-        $this->addChild($menu[getGS('Merge article types')], getGS('Step 2'), array('zend_route' => array(
+        $status = $this->addChild($menu[$translator->trans('Merge article types', array(), 'article_types')], $translator->trans('Step 2'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'article_types',
                 'action' => 'merge2.php',
@@ -319,9 +377,12 @@ class Builder
             'resource' => 'article-type',
             'privilege' => 'manage',
         ));
-        $menu[getGS('Merge article types')][getGS('Step 2')]->setDisplay(false);
+        
+        if ($status) {
+            $menu[$translator->trans('Merge article types', array(), 'article_types')][$translator->trans('Step 2', array(), 'home')]->setDisplay(false);
+        }
 
-        $this->addChild($menu[getGS('Merge article types')], getGS('Step 3'), array('zend_route' => array(
+        $status = $this->addChild($menu[$translator->trans('Merge article types', array(), 'article_types')], $translator->trans('Step 3', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'article_types',
                 'action' => 'merge3.php',
@@ -330,18 +391,24 @@ class Builder
             'resource' => 'article-type',
             'privilege' => 'manage',
         ));
-        $menu[getGS('Merge article types')][getGS('Step 3')]->setDisplay(false);
+
+        if ($status) {
+            $menu[$translator->trans('Merge article types', array(), 'article_types')][$translator->trans('Step 3', array(), 'home')]->setDisplay(false);
+        }
 
         if($this->user->hasPermission('ManageCountries') || $this->user->hasPermission('DeleteCountries')) {
-            $this->addChild($menu, getGS('Countries'), array('zend_route' => array(
+            $status = $this->addChild($menu, $translator->trans('Countries'), array('zend_route' => array(
                     'module' => 'admin',
                     'controller' => 'country',
                     'action' => 'index.php',
                 )
             ));
-            $menu[getGS('Countries')]->setDisplay(false);
 
-            $this->addChild($menu[getGS('Countries')], getGS('Add new country'), array('zend_route' => array(
+            if ($status) {
+                $menu[$translator->trans('Countries')]->setDisplay(false);
+            }
+
+            $this->addChild($menu[$translator->trans('Countries')], $translator->trans('Add new country'), array('zend_route' => array(
                     'module' => 'admin',
                     'controller' => 'country',
                     'action' => 'add.php'
@@ -350,7 +417,7 @@ class Builder
                 'privilege' => 'manage',
             ));
 
-            $this->addChild($menu[getGS('Countries')], getGS('Edit country'), array('zend_route' => array(
+            $status = $this->addChild($menu[$translator->trans('Countries')], $translator->trans('Edit country'), array('zend_route' => array(
                     'module' => 'admin',
                     'controller' => 'country',
                     'action' => 'edit.php',
@@ -359,10 +426,13 @@ class Builder
                 'resource' => 'country',
                 'privilege' => 'manage',
             ));
-            $menu[getGS('Countries')][getGS('Edit country')]->setDisplay(false);
+
+            if ($status) {
+                $menu[$translator->trans('Countries')][$translator->trans('Edit country')]->setDisplay(false);
+            }
         }
 
-        $this->addChild($menu, getGS('Edit your password'), array('zend_route' => array(
+        $this->addChild($menu, $translator->trans('Edit your password', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'user',
                 'action' => 'edit-password'
@@ -370,7 +440,7 @@ class Builder
         ));
 
         if ($this->user->hasPermission('ManageIssue') && $this->user->hasPermission('AddArticle')) {
-            $this->addChild($menu, getGS('Import XML'), array('zend_route' => array(
+            $this->addChild($menu, $translator->trans('Import XML', array(), 'home'), array('zend_route' => array(
                     'module' => 'admin',
                     'controller' => 'articles',
                     'action' => 'la_import.php'
@@ -378,7 +448,7 @@ class Builder
             ));
         }
 
-        $this->addChild($menu, getGS('Backup/Restore'), array('zend_route' => array(
+        $this->addChild($menu, $translator->trans('Backup/Restore', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'backup.php',
                 'action' => null
@@ -390,15 +460,17 @@ class Builder
         if (\CampCache::IsEnabled() && $this->user->hasPermission('ClearCache')) {
             $this->addChild(
                 $menu,
-                getGS('Clear system cache'), 
+                $translator->trans('Clear system cache', array(), 'home'), 
                 array('uri' => $this->generateZendRoute('admin') . "/?clear_cache=yes"
             ));
         }
     }
 
     private function prepareConfigureMenu($menu) 
-    {
-        $this->addChild($menu, getGS('System Preferences'), array('zend_route' => array(
+    {   
+        $translator = $this->container->get('translator');
+
+        $this->addChild($menu, $translator->trans('System Preferences'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'preferences',
                 'action' => 'index'
@@ -407,31 +479,40 @@ class Builder
             'privilege' => 'edit',
         ));
 
-        $this->addChild($menu, getGS('Templates'), array('zend_route' => array(
+        $status = $this->addChild($menu, $translator->trans('Templates', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'template',
                 'action' => 'index'
             )
         ));
-        $menu[getGS('Templates')]->setDisplay(false);
 
-        $this->addChild($menu[getGS('Templates')], getGS('Edit'), array('zend_route' => array(
+        if($status) {
+            $menu[$translator->trans('Templates', array(), 'home')]->setDisplay(false);
+        }
+
+        $status = $this->addChild($menu[$translator->trans('Templates', array(), 'home')], $translator->trans('Edit'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'template',
                 'action' => 'edit'
             )
         ));
-        $menu[getGS('Templates')][getGS('Edit')]->setDisplay(false);
 
-        $this->addChild($menu[getGS('Templates')], getGS('Upload'), array('zend_route' => array(
+        if ($status) {
+            $menu[$translator->trans('Templates', array(), 'home')][$translator->trans('Edit')]->setDisplay(false);
+        }
+
+        $status = $this->addChild($menu[$translator->trans('Templates', array(), 'home')], $translator->trans('Upload', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'template',
                 'action' => 'upload'
             )
         ));
-        $menu[getGS('Templates')][getGS('Upload')]->setDisplay(false);
 
-        $this->addChild($menu, getGS('Themes'), array('zend_route' => array(
+        if ($status) {
+            $menu[$translator->trans('Templates', array(), 'home')][$translator->trans('Upload', array(), 'home')]->setDisplay(false);
+        }
+
+        $this->addChild($menu, $translator->trans('Themes', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'themes',
                 'action' => null
@@ -440,7 +521,7 @@ class Builder
             'privilege' => 'manage'
         ));
 
-        $this->addChild($menu[getGS('Themes')], getGS('Settings'), array('zend_route' => array(
+        $status = $this->addChild($menu[$translator->trans('Themes', array(), 'home')], $translator->trans('Settings', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'themes',
                 'action' => 'advanced-theme-settings',
@@ -451,28 +532,37 @@ class Builder
                 'reset_params' => false
             )
         ));
-        $menu[getGS('Themes')][getGS('Settings')]->setDisplay(false);
 
-        $this->addChild($menu[getGS('Themes')][getGS('Settings')], getGS('Upload'), array('zend_route' => array(
+        if ($status) {
+            $menu[$translator->trans('Themes', array(), 'home')][$translator->trans('Settings', array(), 'home')]->setDisplay(false);
+        }
+
+        $status = $this->addChild($menu[$translator->trans('Themes', array(), 'home')][$translator->trans('Settings', array(), 'home')], $translator->trans('Upload', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'template',
                 'action' => 'upload',
                 'reset_params' => false
             )
         ));
-        $menu[getGS('Themes')][getGS('Settings')][getGS('Upload')]->setDisplay(false);
 
-        $this->addChild($menu[getGS('Themes')][getGS('Settings')], getGS('Edit'), array('zend_route' => array(
+        if ($status) {
+            $menu[$translator->trans('Themes', array(), 'home')][$translator->trans('Settings', array(), 'home')][$translator->trans('Upload', array(), 'home')]->setDisplay(false);
+        }
+
+        $status = $this->addChild($menu[$translator->trans('Themes', array(), 'home')][$translator->trans('Settings', array(), 'home')], $translator->trans('Edit'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'template',
                 'action' => 'edit',
                 'reset_params' => false
             )
         ));
-        $menu[getGS('Themes')][getGS('Settings')][getGS('Edit')]->setDisplay(false);
+
+        if ($status) {
+            $menu[$translator->trans('Themes', array(), 'home')][$translator->trans('Settings', array(), 'home')][$translator->trans('Edit')]->setDisplay(false);
+        }
 
         if($this->user->hasPermission('DeleteArticleTypes')) {
-            $this->addChild($menu, getGS('Article Types'), array('zend_route' => array(
+            $this->addChild($menu, $translator->trans('Article Types'), array('zend_route' => array(
                     'module' => 'admin',
                     'controller' => 'article_types',
                     'action' => 'index.php',
@@ -482,7 +572,7 @@ class Builder
             ));
         }
 
-        $this->addChild($menu, getGS('Topics'), array('zend_route' => array(
+        $this->addChild($menu, $translator->trans('Topics'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'topics',
                 'action' => 'index.php',
@@ -491,7 +581,7 @@ class Builder
             'privilege' => 'manage'
         ));
 
-        $this->addChild($menu, getGS('Languages'), array('zend_route' => array(
+        $this->addChild($menu, $translator->trans('Languages'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'languages',
                 'action' => null,
@@ -500,7 +590,7 @@ class Builder
             'privilege' => 'manage'
         ));
 
-        $this->addChild($menu[getGS('Languages')], getGS('Edit language'), array('zend_route' => array(
+        $status = $this->addChild($menu[$translator->trans('Languages')], $translator->trans('Edit language', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'languages',
                 'action' => 'edit',
@@ -509,9 +599,12 @@ class Builder
             'resource' => 'language',
             'privilege' => 'manage'
         ));
-        $menu[getGS('Languages')][getGS('Edit language')]->setDisplay(false);
 
-        $this->addChild($menu[getGS('Languages')], getGS('Add new language'), array('zend_route' => array(
+        if ($status) {
+            $menu[$translator->trans('Languages')][$translator->trans('Edit language', array(), 'home')]->setDisplay(false);
+        }
+
+        $status = $this->addChild($menu[$translator->trans('Languages')], $translator->trans('Add new language'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'languages',
                 'action' => 'add',
@@ -519,10 +612,13 @@ class Builder
             'resource' => 'language',
             'privilege' => 'manage'
         ));
-        $menu[getGS('Languages')][getGS('Add new language')]->setDisplay(false);
+
+        if ($status) {
+            $menu[$translator->trans('Languages')][$translator->trans('Add new language')]->setDisplay(false);
+        }
 
         if($this->user->hasPermission('ManageCountries') || $this->user->hasPermission('DeleteCountries')) {
-            $this->addChild($menu, getGS('Countries'), array('zend_route' => array(
+            $this->addChild($menu, $translator->trans('Countries'), array('zend_route' => array(
                     'module' => 'admin',
                     'controller' => 'country',
                     'action' => 'index.php',
@@ -530,17 +626,8 @@ class Builder
             ));
         }
 
-        if($this->user->hasPermission('ManageLocalizer')) {
-            $this->addChild($menu, getGS('Localizer'), array('zend_route' => array(
-                    'module' => 'admin',
-                    'controller' => 'localizer',
-                    'action' => 'index.php',
-                )
-            ));
-        }
-
         if($this->user->hasPermission('ViewLogs')) {
-            $this->addChild($menu, getGS('Logs'), array('zend_route' => array(
+            $this->addChild($menu, $translator->trans('Logs'), array('zend_route' => array(
                     'module' => 'admin',
                     'controller' => 'log',
                     'action' => null
@@ -550,7 +637,7 @@ class Builder
             ));
         }
 
-        $this->addChild($menu, getGS('Support'), array('zend_route' => array(
+        $this->addChild($menu, $translator->trans('Support', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'support',
                 'action' => null,
@@ -560,7 +647,7 @@ class Builder
             )
         ));
 
-        $this->addChild($menu, getGS('Image Rendering'), array('zend_route' => array(
+        $this->addChild($menu, $translator->trans('Image Rendering', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'rendition',
                 'action' => null
@@ -569,8 +656,10 @@ class Builder
     }
 
     private function prepareUsersMenu($menu) 
-    {
-        $this->addChild($menu, getGS('Manage Users'), array('zend_route' => array(
+    {   
+        $translator = $this->container->get('translator');
+
+        $this->addChild($menu, $translator->trans('Manage Users', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'user',
                 'action' => 'index',
@@ -578,49 +667,61 @@ class Builder
             )
         ));
 
-        $this->addChild($menu[getGS('Manage Users')], getGS('Edit user'), array('zend_route' => array(
+        $status = $this->addChild($menu[$translator->trans('Manage Users', array(), 'home')], $translator->trans('Edit user', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'user',
                 'action' => 'edit',
                 'reset_params' => false
             )
         ));
-        $menu[getGS('Manage Users')][getGS('Edit user')]->setDisplay(false);
 
-        $this->addChild($menu[getGS('Manage Users')][getGS('Edit user')], getGS('Edit permissions'), array('zend_route' => array(
+        if ($status) {
+            $menu[$translator->trans('Manage Users', array(), 'home')][$translator->trans('Edit user', array(), 'home')]->setDisplay(false);
+        }
+
+        $status = $this->addChild($menu[$translator->trans('Manage Users', array(), 'home')][$translator->trans('Edit user', array(), 'home')], $translator->trans('Edit permissions', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'acl',
                 'action' => 'edit'
             )
         ));
-        $menu[getGS('Manage Users')][getGS('Edit user')][getGS('Edit permissions')]->setDisplay(false);
 
-        $this->addChild($menu[getGS('Manage Users')], getGS('Rename user'), array('zend_route' => array(
+        if ($status) {
+            $menu[$translator->trans('Manage Users', array(), 'home')][$translator->trans('Edit user', array(), 'home')][$translator->trans('Edit permissions', array(), 'home')]->setDisplay(false);
+        }
+
+        $status = $this->addChild($menu[$translator->trans('Manage Users', array(), 'home')], $translator->trans('Rename user', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'user',
                 'action' => 'rename',
                 'reset_params' => false
             )
         ));
-        $menu[getGS('Manage Users')][getGS('Rename user')]->setDisplay(false);
 
-        $this->addChild($menu[getGS('Manage Users')], getGS('Create new user'), array('zend_route' => array(
+        if ($status) {
+            $menu[$translator->trans('Manage Users', array(), 'home')][$translator->trans('Rename user', array(), 'home')]->setDisplay(false);
+        }
+
+        $status = $this->addChild($menu[$translator->trans('Manage Users', array(), 'home')], $translator->trans('Create new user', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'user',
                 'action' => 'create',
                 'reset_params' => false
             )
         ));
-        $menu[getGS('Manage Users')][getGS('Create new user')]->setDisplay(false);
 
-        $this->addChild($menu, getGS('Manage Authors'), array('zend_route' => array(
+        if ($status) {
+            $menu[$translator->trans('Manage Users', array(), 'home')][$translator->trans('Create new user', array(), 'home')]->setDisplay(false);
+        }
+
+        $this->addChild($menu, $translator->trans('Manage Authors', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'users',
                 'action' => 'authors.php',
             )
         ));
 
-        $this->addChild($menu, getGS('Manage Authors'), array('zend_route' => array(
+        $this->addChild($menu, $translator->trans('Manage Authors', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'users',
                 'action' => 'authors.php',
@@ -629,7 +730,7 @@ class Builder
             'privilege' => 'edit',
         ));
 
-        $this->addChild($menu, getGS('Manage User Types'), array('zend_route' => array(
+        $this->addChild($menu, $translator->trans('Manage User Types', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'user-group',
                 'action' => null,
@@ -638,24 +739,19 @@ class Builder
             'privilege' => 'manage',
         ));
 
-        $this->addChild($menu[getGS('Manage User Types')], getGS('Add new user type'), array('zend_route' => array(
-                'module' => 'admin',
-                'controller' => 'user-group',
-                'action' => 'add',
-            )
-        ));
-        $menu[getGS('Manage User Types')][getGS('Add new user type')]->setDisplay(false);
-
-        $this->addChild($menu[getGS('Manage User Types')], getGS('Edit user type'), array('zend_route' => array(
+        $status = $this->addChild($menu[$translator->trans('Manage User Types', array(), 'home')], $translator->trans('Edit user type', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'user-group',
                 'action' => 'edit-access',
                 'reset_params' => false
             )
         ));
-        $menu[getGS('Manage User Types')][getGS('Edit user type')]->setDisplay(false);
 
-        $this->addChild($menu, getGS('Create new account'), array('zend_route' => array(
+        if ($status) {
+            $menu[$translator->trans('Manage User Types', array(), 'home')][$translator->trans('Edit user type', array(), 'home')]->setDisplay(false);
+        }
+
+        $this->addChild($menu, $translator->trans('Create new account', array(), 'home'), array('zend_route' => array(
                 'module' => 'admin',
                 'controller' => 'user',
                 'action' => 'create',
@@ -664,7 +760,8 @@ class Builder
     }
 
     public function preparePluginsMenu($menu)
-    {
+    {   
+        $translator = $this->container->get('translator');
         $root_menu = false;
         $plugin_infos = \CampPlugin::GetPluginsInfo(true);
         if ($this->user->hasPermission('plugin_manager')) {
@@ -687,22 +784,28 @@ class Builder
             return;
         }
 
-        $menu->addChild(getGS('Plugins'), array('uri' => '#'));
+        $menu->addChild($translator->trans('Plugins'), array('uri' => '#'))
+            ->setAttribute('dropdown', true)
+            ->setLinkAttribute('data-toggle', 'dropdown');
 
         if ($this->user->hasPermission('plugin_manager')) {
-            $this->addChild($menu[getGS('Plugins')], getGS('Manage Plugins'), array('zend_route' => array(
+            $this->addChild($menu[$translator->trans('Plugins')], $translator->trans('Manage Plugins'), array('zend_route' => array(
                     'module' => 'admin',
                     'controller' => 'plugins',
                     'action' => 'manage.php',
                 )
             ));
         }
-        
-        foreach ($plugin_infos as $info) {
-            if (\CampPlugin::IsPluginEnabled($info['name'])) {
-                $parent_menu = false;
 
-                $Plugin = new \CampPlugin($info['name']);
+        $enabled = \CampPlugin::GetEnabled();
+        $enabledIds = array();
+        foreach ($enabled as $plugin) {
+            $enabledIds[] = $plugin->getName();
+        }
+
+        foreach ($plugin_infos as $info) {
+            if (in_array($info['name'], $enabledIds)) {
+                $parent_menu = false;
 
                 if (isset($info['menu']['permission']) && $this->user->hasPermission($info['menu']['permission'])) {
                     $parent_menu = true;
@@ -720,9 +823,9 @@ class Builder
                         $uri = $this->generateZendRoute('admin') .'/'. $info['menu']['path'];
                     }
 
-                    $this->addChild($menu[getGS('Plugins')], getGS($info['menu']['label']), array(
+                    $this->addChild($menu[$translator->trans('Plugins')], $translator->trans($info['menu']['label']), array(
                         'uri' => $uri
-                    ));
+                    ))->setLinkAttribute('data-toggle', 'rightdrop');
                 }
 
                 if (isset($info['menu']['sub']) && is_array($info['menu']['sub'])) {
@@ -733,7 +836,7 @@ class Builder
                                 $uri = $this->generateZendRoute('admin') .'/'. $menu_info['path'];
                             }
 
-                            $this->addChild($menu[getGS('Plugins')][getGS($info['menu']['label'])], getGS($menu_info['label']), array(
+                            $this->addChild($menu[$translator->trans('Plugins')][$translator->trans($info['menu']['label'])], $translator->trans($menu_info['label']), array(
                                 'uri' => $uri
                             ));
                         }
@@ -745,18 +848,20 @@ class Builder
         return $menu;
     }
 
-    private function addChild($menu, $name, $element) {
+    protected function addChild($menu, $name, $element) {
         if(array_key_exists('resource', $element) && array_key_exists('privilege', $element)) {
             if (!$this->hasPermission($element['resource'], $element['privilege'])) {
-                return;
+                return false;
             }
         }
 
         if(array_key_exists('zend_route', $element)) {
             $element['uri'] = $this->generateZendRoute($element['zend_route']['module'], $element); 
         }
-
-        return $menu->addChild($name, $element);
+        
+        if (is_object($menu)) {
+            return $menu->addChild($name, $element);
+        }
     }
 
     private function hasPermission($resource, $action) 

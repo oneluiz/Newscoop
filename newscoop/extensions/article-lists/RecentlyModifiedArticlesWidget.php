@@ -19,28 +19,13 @@ class RecentlyModifiedArticlesWidget extends ArticlesWidget
     protected $count = 20;
 
     public function __construct()
-    {
-        $this->title = getGS('Recently Modified Articles');
+    {   
+        $translator = \Zend_Registry::get('container')->getService('translator');
+        $this->title = $translator->trans('Recently Modified Articles', array(), 'extensions');
     }
 
     public function beforeRender()
     {
-        $articlesParams = array();
-
-        foreach((array) \ArticleType::GetArticleTypes(true) as $one_art_type_name) {
-            $one_art_type = new \ArticleType($one_art_type_name);
-            if ($one_art_type->getFilterStatus()) {
-                $articlesParams[] = new ComparisonOperation('type', new Operator('not', 'string'), $one_art_type->getTypeName());
-            }
-        }
-
-        $articlesOrders = array(
-                array(
-                    'field' => 'bylastupdate',
-                    'dir' => 'desc',
-                )
-        );
-
-        $this->items = Article::GetList($articlesParams, $articlesOrders, 0, self::LIMIT, $count = 0);
+        $this->items = Article::GetRecentlyModifiedArticles(self::LIMIT);
     }
 }
